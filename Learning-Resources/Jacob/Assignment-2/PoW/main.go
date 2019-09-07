@@ -30,7 +30,7 @@ type Block struct {
 	Hash       string
 	PrevHash   string
 	Difficulty int
-	Nonce      string //number calculated to create hash with correct amount of prefixed zeroes
+	Nonce      string //hexidecimal number calculated to create hash with correct amount of prefixed zeroes
 }
 
 var Blockchain []Block
@@ -180,6 +180,7 @@ func main() {
 		t := time.Now()
 		genesisBlock := Block{}
 		genesisBlock = Block{0, t.String(), 0, calculateHash(genesisBlock), "", difficulty, ""}
+
 		spew.Dump(genesisBlock)
 
 		mutex.Lock()
