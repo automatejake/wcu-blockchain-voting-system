@@ -29,7 +29,7 @@ var Blockchain []Block
 func calculateHash(block Block) string {
 	record := string(block.Index) + block.Timestamp + string(block.BPM) + block.PrevHash
 	h := sha256.New()
-	h.Write([]byte(record))
+	h.Write([]byte(record)) //https://golang.org/pkg/crypto/sha256/
 	hashed := h.Sum(nil)
 	return hex.EncodeToString(hashed)
 }
@@ -50,14 +50,18 @@ func generateBlock(oldBlock Block, BPM int) (Block, error) {
 }
 
 func isBlockValid(newBlock, oldBlock Block) bool {
+	
+	//make sure this is the next block
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
 	}
 
+	//verify last hash is same as new blocks, previous hash 
 	if oldBlock.Hash != newBlock.PrevHash {
 		return false
 	}
 
+	//verify hash is valid
 	if calculateHash(newBlock) != newBlock.Hash {
 		return false
 	}
@@ -79,9 +83,9 @@ func run() error {
 	s := &http.Server{
 		Addr:           ":" + httpAddr,
 		Handler:        mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+		// ReadTimeout:    10 * time.Second,
+		// WriteTimeout:   10 * time.Second,
+		// MaxHeaderBytes: 1 << 20,
 	}
 
 	if err := s.ListenAndServe(); err != nil {
