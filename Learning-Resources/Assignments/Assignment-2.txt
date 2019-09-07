@@ -6,3 +6,7 @@ PoW: https://medium.com/@mycoralhealth/code-your-own-blockchain-mining-algorithm
 PoS: https://medium.com/@mycoralhealth/code-your-own-proof-of-stake-blockchain-in-go-610cd99aa658
 
 As we code, we ought to think of a positive incentive for validators to be honest in a chain designed for voting.
+
+
+Command for writing transactions to blockchain on localhost chains using curl:
+curl -X POST -H "Content-Type: application/json" -d '{"BPM":100}' localhost:8080
