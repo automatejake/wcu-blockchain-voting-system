@@ -30,7 +30,7 @@ type Block struct {
 	Hash       string
 	PrevHash   string
 	Difficulty int
-	Nonce      string
+	Nonce      string //number calculated to create hash with correct amount of prefixed zeroes
 }
 
 var Blockchain []Block
@@ -50,7 +50,7 @@ func run() error {
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+		MaxHeaderBytes: 1 << 20, //2^20
 	}
 
 	if err := s.ListenAndServe(); err != nil {
@@ -76,18 +76,6 @@ func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(bytes))
 }
 
-func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	response, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("HTTP 500: Internal Server Error"))
-		return
-	}
-	w.WriteHeader(code)
-	w.Write(response)
-}
-
 func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var m Message
@@ -99,9 +87,9 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	//ensure atomicity when creating new block
+	//ensure atomicity when creating new block, mutex makes sure blocks are created at different times https://en.wikipedia.org/wiki/Mutual_exclusion
 	mutex.Lock()
-	newBlock := generateBlock(Blockchain[len(Blockchain)-1], m.BPM)
+	newBlock := generateBlock(Blockchain[len(Blockchain)-1], m.BPM) //calls function to generate block which executes proof of work before the transaction is validated
 	mutex.Unlock()
 
 	if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
@@ -111,6 +99,18 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, r, http.StatusCreated, newBlock)
 
+}
+
+func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	response, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("HTTP 500: Internal Server Error"))
+		return
+	}
+	w.WriteHeader(code)
+	w.Write(response)
 }
 
 func isBlockValid(newBlock, oldBlock Block) bool {
