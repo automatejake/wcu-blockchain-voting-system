@@ -21,7 +21,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const difficulty = 1 //amount of prefix zeroes
+const difficulty = 6 //amount of prefix zeroes
 
 type Block struct {
 	Index      int
@@ -158,7 +158,7 @@ func generateBlock(oldBlock Block, BPM int) Block {
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
 			fmt.Println(calculateHash(newBlock), " do more work!")
-			time.Sleep(time.Second)
+			// time.Sleep(time.Second)
 			continue
 		} else {
 			fmt.Println(calculateHash(newBlock), " work done!")
@@ -176,6 +176,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	//not sure why this is a separate go routine, but does not have to be
 	go func() {
 		t := time.Now()
 		genesisBlock := Block{}
@@ -187,6 +188,7 @@ func main() {
 		Blockchain = append(Blockchain, genesisBlock)
 		mutex.Unlock()
 	}()
+
 	log.Fatal(run())
 
 }
