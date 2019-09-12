@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -19,7 +18,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const difficulty = 1
+const difficulty = 3
 
 type Block struct {
 	Index      int
@@ -61,7 +60,7 @@ func main() {
 
 func calculateHash(block Block) string {
 	// record := string(block.Index) + block.Timestamp + string(block.BPM) + block.Hash + block.PrevHash + block.Nonce
-	record := strconv.Itoa(block.Index) + block.Timestamp + strconv.Itoa(block.BPM) + block.PrevHash + block.Nonce
+	record := string(block.Index) + block.Timestamp + string(block.BPM) + block.PrevHash + block.Nonce
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
