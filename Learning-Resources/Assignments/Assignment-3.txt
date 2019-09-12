@@ -1,0 +1,11 @@
+Our third assigment is focussed on understanding networking and continuing understanding different validation mechanisms.  
+
+We will follow the same series of articles to code simple PoS chain:
+
+PoS: https://medium.com/@mycoralhealth/code-your-own-proof-of-stake-blockchain-in-go-610cd99aa658
+
+As we code, we ought to think of a positive incentive for validators to be honest in a chain designed for voting.
+
+
+Command for writing transactions to blockchain on localhost chains using curl:
+curl -X POST -H "Content-Type: application/json" -d '{"BPM":100}' localhost:8080
