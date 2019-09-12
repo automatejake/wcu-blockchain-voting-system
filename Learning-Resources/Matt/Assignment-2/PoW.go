@@ -121,10 +121,10 @@ func run() error {
 	httpAddr := os.Getenv("PORT")
 	log.Println("Listening on ", os.Getenv("PORT"))
 	s := &http.Server{
-		Addr:           ":" + httpAddr,
-		Handler:        mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		Addr:    ":" + httpAddr,
+		Handler: mux,
+		// ReadTimeout:    10 * time.Second,
+		// WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
@@ -143,7 +143,7 @@ func makeMuxRouter() http.Handler {
 }
 
 func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
-	bytes, err := json.MarshalIndent(Blockchain, "", "")
+	bytes, err := json.MarshalIndent(Blockchain, "", "  ")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -153,7 +153,7 @@ func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
 
 func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	response, err := json.MarshalIndent(payload, "", "")
+	response, err := json.MarshalIndent(payload, "", "  ") //MarshalIndent pretty prints the returned json.  Make sure you have the spaces, you had this: response, err := json.MarshalIndent(payload, "", "")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("HTTP 500: Internal Server Error"))
