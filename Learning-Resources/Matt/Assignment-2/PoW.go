@@ -37,6 +37,8 @@ type Message struct {
 	BPM int
 }
 
+var mutex = &sync.Mutex{}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -115,8 +117,6 @@ func generateBlock(oldBlock Block, BPM int) Block {
 
 	return newBlock
 }
-
-var mutex = &sync.Mutex{}
 
 func run() error {
 	mux := makeMuxRouter()
