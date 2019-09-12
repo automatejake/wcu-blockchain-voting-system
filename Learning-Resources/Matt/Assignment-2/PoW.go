@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -57,7 +58,8 @@ func main() {
 }
 
 func calculateHash(block Block) string {
-	record := string(block.Index) + block.Timestamp + string(block.BPM) + block.Hash + block.PrevHash + block.Nonce
+	// record := string(block.Index) + block.Timestamp + string(block.BPM) + block.Hash + block.PrevHash + block.Nonce
+	record := strconv.Itoa(block.Index) + block.Timestamp + strconv.Itoa(block.BPM) + block.PrevHash + block.Nonce
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
@@ -102,7 +104,7 @@ func generateBlock(oldBlock Block, BPM int) Block {
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
 			fmt.Printf(calculateHash(newBlock), "Do more work!")
-			time.Sleep(time.Second)
+			// time.Sleep(time.Second) Dont really need this as it is counterintuitive for PoW.
 			continue
 		} else {
 			fmt.Println(calculateHash(newBlock), "Work Done!")
@@ -121,10 +123,10 @@ func run() error {
 	httpAddr := os.Getenv("PORT")
 	log.Println("Listening on ", os.Getenv("PORT"))
 	s := &http.Server{
-		Addr:    ":" + httpAddr,
-		Handler: mux,
-		// ReadTimeout:    10 * time.Second,
-		// WriteTimeout:   10 * time.Second,
+		Addr:           ":" + httpAddr,
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
@@ -143,7 +145,7 @@ func makeMuxRouter() http.Handler {
 }
 
 func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
-	bytes, err := json.MarshalIndent(Blockchain, "", "  ")
+	bytes, err := json.MarshalIndent(Blockchain, "", "  ") //MarshalIndent pretty prints the returned json.  Make sure you have the spaces, you had this: response, err := json.MarshalIndent(payload, "", "")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
