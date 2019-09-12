@@ -1,11 +1,14 @@
-Our third assigment is focussed on understanding networking and continuing understanding different validation mechanisms.  
+Our third assigment is focussed on understanding networking  
 
-We will follow the same series of articles to code simple PoS chain:
+We will follow the same series of articles to code
 
-PoS: https://medium.com/@mycoralhealth/code-your-own-proof-of-stake-blockchain-in-go-610cd99aa658
+Networking: https://medium.com/@mycoralhealth/part-2-networking-code-your-own-blockchain-in-less-than-200-lines-of-go-17fe1dad46e1
 
-As we code, we ought to think of a positive incentive for validators to be honest in a chain designed for voting.
+Lets Attempt These Challenges So that It is Not Just Copy and Paste:
 
+1 - Make this chain PoW
+2 - Create multiple directories that hold a copy of the application each with different TCP ports. 
+For each terminal session, serve a TCP port and connect to a different one so you can receive and send data.
 
 Command for writing transactions to blockchain on localhost chains using curl:
 curl -X POST -H "Content-Type: application/json" -d '{"BPM":100}' localhost:8080
