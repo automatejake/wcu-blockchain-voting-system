@@ -1,1 +1,3 @@
 Enter links to helpful resources here:
+
+Understanding Different Between Channels and Mutexes https://medium.com/mindorks/https-medium-com-yashishdua-synchronizing-states-using-mutex-vs-channel-in-go-25e646c83567
