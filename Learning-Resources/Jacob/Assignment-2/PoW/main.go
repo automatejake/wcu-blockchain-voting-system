@@ -21,7 +21,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const difficulty = 6 //amount of prefix zeroes
+const difficulty = 5 //amount of prefix zeroes
 
 type Block struct {
 	Index      int
