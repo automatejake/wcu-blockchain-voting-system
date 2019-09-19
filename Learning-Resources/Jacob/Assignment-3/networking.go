@@ -148,13 +148,6 @@ func main() {
 
 	bcServer = make(chan []Block)
 
-	// Index     int
-	// Timestamp string
-	// Message   string
-	// PrevHash  string
-	// Nonce     string
-	// Hash      string
-
 	t := time.Now()
 	genesisBlock := Block{0, t.String(), "Genesis Block", "", "", 0, ""}
 	spew.Dump(genesisBlock) //pretty prints block before appending it
