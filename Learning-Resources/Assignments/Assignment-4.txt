@@ -1,0 +1,7 @@
+Our fourth assignment is a proof of stake implementation with the same networking concepts as the last tutorial:
+https://medium.com/@mycoralhealth/part-2-networking-code-your-own-blockchain-in-less-than-200-lines-of-go-17fe1dad46e1
+
+Again, in this tutorial, our goal should be to serve the same blockchain with processes on different ports.
+
+This logic is not built into the tutorial and could prove to be difficult.  However, once we achieve this step,
+it is not much extra work to deploy our own blockchain to the cloud.
