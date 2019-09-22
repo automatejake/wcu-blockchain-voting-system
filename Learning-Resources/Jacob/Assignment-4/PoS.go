@@ -159,7 +159,7 @@ func handleConn(conn net.Conn) {
 
 	// simulate receiving broadcast
 	for {
-		time.Sleep(time.Minute)
+		time.Sleep(time.Second * 6)
 		mutex.Lock()
 		output, err := json.Marshal(Blockchain)
 		mutex.Unlock()

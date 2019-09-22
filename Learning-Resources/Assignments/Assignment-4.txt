@@ -3,5 +3,8 @@ https://medium.com/@mycoralhealth/code-your-own-proof-of-stake-blockchain-in-go-
 
 Again, in this tutorial, our goal should be to serve the same blockchain with processes on different ports.
 
+Once it is able to run on different ports, make the port get dynamically assigned so that many instances can run without interference or assigning
+new ports manually
+
 This logic is not built into the tutorial and could prove to be difficult.  However, once we achieve this step,
 it is not much extra work to deploy our own blockchain to the cloud.
