@@ -23,7 +23,7 @@ import (
 type Block struct {
 	Index     int
 	Timestamp string
-	BPM       int
+	Message   string
 	Hash      string
 	PrevHash  string
 	Validator string
@@ -55,12 +55,12 @@ func calculateHash(s string) string {
 
 //calculateBlockHash returns the hash of all block information
 func calculateBlockHash(block Block) string {
-	record := string(block.Index) + block.Timestamp + string(block.BPM) + block.PrevHash
+	record := string(block.Index) + block.Timestamp + block.Message + block.PrevHash
 	return calculateHash(record)
 }
 
 // generateBlock creates a new block using previous block's hash
-func generateBlock(oldBlock Block, BPM int, address string) (Block, error) {
+func generateBlock(oldBlock Block, Message string, address string) (Block, error) {
 
 	var newBlock Block
 
@@ -68,7 +68,7 @@ func generateBlock(oldBlock Block, BPM int, address string) (Block, error) {
 
 	newBlock.Index = oldBlock.Index + 1
 	newBlock.Timestamp = t.String()
-	newBlock.BPM = BPM
+	newBlock.Message = Message
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Hash = calculateBlockHash(newBlock)
 	newBlock.Validator = address
@@ -123,28 +123,22 @@ func handleConn(conn net.Conn) {
 		break
 	}
 
-	io.WriteString(conn, "\nEnter a new BPM:")
+	io.WriteString(conn, "\nEnter a new Message:")
 
-	scanBPM := bufio.NewScanner(conn)
+	scanMessage := bufio.NewScanner(conn)
 
 	go func() {
 		for {
-			// take in BPM from stdin and add it to blockchain after conducting necessary validation
-			for scanBPM.Scan() {
-				bpm, err := strconv.Atoi(scanBPM.Text())
-				// if malicious party tries to mutate the chain with a bad input, delete them as a validator and they lose their staked tokens
-				if err != nil {
-					log.Printf("%v not a number: %v", scanBPM.Text(), err)
-					delete(validators, address)
-					conn.Close()
-				}
+			// take in message from stdin and add it to blockchain after conducting necessary validation
+			for scanMessage.Scan() {
+				message := scanMessage.Text()
 
 				mutex.Lock()
 				oldLastIndex := Blockchain[len(Blockchain)-1]
 				mutex.Unlock()
 
 				// create newBlock for consideration to be forged
-				newBlock, err := generateBlock(oldLastIndex, bpm, address)
+				newBlock, err := generateBlock(oldLastIndex, message, address)
 				if err != nil {
 					log.Println(err)
 					continue
@@ -152,7 +146,7 @@ func handleConn(conn net.Conn) {
 				if isBlockValid(newBlock, oldLastIndex) {
 					candidateBlocks <- newBlock
 				}
-				io.WriteString(conn, "\nEnter a new BPM:")
+				io.WriteString(conn, "\nEnter a new Message:")
 			}
 		}
 	}()
@@ -240,7 +234,7 @@ func main() {
 	// create genesis block
 	t := time.Now()
 	genesisBlock := Block{}
-	genesisBlock = Block{0, t.String(), 0, calculateBlockHash(genesisBlock), "", ""}
+	genesisBlock = Block{0, t.String(), "", calculateBlockHash(genesisBlock), "", ""}
 	spew.Dump(genesisBlock)
 	Blockchain = append(Blockchain, genesisBlock)
 
