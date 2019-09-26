@@ -117,6 +117,8 @@ func handleConn(conn net.Conn) {
 			return
 		}
 		t := time.Now()
+
+		// insecure way of assigning an address because someone could figure out timestamp.  Works for this tutorial
 		address = calculateHash(t.String())
 		validators[address] = balance
 		fmt.Println(validators)
@@ -138,7 +140,8 @@ func handleConn(conn net.Conn) {
 				mutex.Unlock()
 
 				// create newBlock for consideration to be forged
-				newBlock, err := generateBlock(oldLastIndex, message, address)
+				newBlock, err := 
+				(oldLastIndex, message, address)
 				if err != nil {
 					log.Println(err)
 					continue
