@@ -140,8 +140,7 @@ func handleConn(conn net.Conn) {
 				mutex.Unlock()
 
 				// create newBlock for consideration to be forged
-				newBlock, err := 
-				(oldLastIndex, message, address)
+				newBlock, err := generateBlock(oldLastIndex, message, address)
 				if err != nil {
 					log.Println(err)
 					continue
