@@ -1,0 +1,13 @@
+Our fifth assignment is to make last week's Proof of Stake implementation https://github.com/jneubaum/wcu-blockchain-voting-system/blob/master/Learning-Resources/Assignments/Assignment-4.txt
+into a full peer to peer implementation.  In this assignment, we will synchronize the state of the blockchain across all nodes whenever a transaction occurs.
+
+We should also attempt to have validating nodes (peers) vote on the validity of transactions and there ought to be a penalty for bad actors.
+
+There are many different implementations of proof of stake.
+
+EOS has 21 block producers that vote on transactions, in our latest implementation, a random person was chosen to be the validator and their chance was increased by
+the amount of tokens they had staked.
+
+For this assignment, we should make all nodes vote on the validity of a transaction and if a certain amount of votes (say 3) validate a block, it gets added to the chain
+else if one of the actor relays false information, their balance gets set to zero.  This penalty is necessary as it is "the stake" that is put up for the ability
+to vote on transactions.  

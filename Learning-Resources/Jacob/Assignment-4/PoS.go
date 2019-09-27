@@ -121,7 +121,7 @@ func handleConn(conn net.Conn) {
 		// insecure way of assigning an address because someone could figure out timestamp.  Works for this tutorial
 		address = calculateHash(t.String())
 		validators[address] = balance
-		fmt.Println(validators)
+		fmt.Println(validators) // prints to the main node, not connecting nodes
 		break
 	}
 
@@ -170,7 +170,7 @@ func handleConn(conn net.Conn) {
 // pickWinner creates a lottery pool of validators and chooses the validator who gets to forge a block to the blockchain
 // by random selecting from the pool, weighted by amount of tokens staked
 func pickWinner() {
-	time.Sleep(30 * time.Second)
+	time.Sleep(10 * time.Second)
 	mutex.Lock()
 	temp := tempBlocks
 	mutex.Unlock()
@@ -206,7 +206,7 @@ func pickWinner() {
 		// randomly pick winner from lottery pool
 		s := rand.NewSource(time.Now().Unix())
 		r := rand.New(s)
-		lotteryWinner := lotteryPool[r.Intn(len(lotteryPool))]
+		lotteryWinner := lotteryPool[r.Intn(len(lotteryPool))] // https://golang.org/pkg/math/rand/#example_Intn
 
 		// add block of winner to blockchain and let all the other nodes know
 		for _, block := range temp {
