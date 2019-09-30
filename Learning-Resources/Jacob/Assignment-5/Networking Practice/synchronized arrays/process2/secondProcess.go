@@ -10,7 +10,7 @@ import (
 )
 
 type ClientManager struct {
-	clients    map[*Client]bool
+	clients    map[*Client]bool //client keys to bool values
 	broadcast  chan []byte
 	register   chan *Client
 	unregister chan *Client

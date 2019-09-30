@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net"
-	"os"
 )
 
 type Block struct {
@@ -50,11 +49,11 @@ func handleConn(conn net.Conn) {
 func main() {
 	index = 0
 	port := ":1200"
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", port)
-	checkError(err)
 
-	server, err := net.ListenTCP("tcp", tcpAddr)
-	checkError(err)
+	server, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for {
 		conn, err := server.Accept()
@@ -63,12 +62,5 @@ func main() {
 		}
 
 		go handleConn(conn)
-	}
-}
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		os.Exit(1)
 	}
 }
