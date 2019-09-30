@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
@@ -9,26 +11,39 @@ import (
 )
 
 type Block struct {
-	index     int
-	randomNum int
+	Index     int
+	RandomNum int
 }
 
 var SyncBlockchain []Block
 var index int
 
 func handleConn(conn net.Conn) {
+	result, err := ioutil.ReadAll(conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(result)
+
 	newValue := rand.Intn(100)
 	var tempBlock Block
 
-	tempBlock.index = index
-	tempBlock.randomNum = newValue
+	tempBlock.Index = index
+	tempBlock.RandomNum = newValue
 
 	fmt.Println("New value is ", newValue)
 	SyncBlockchain = append(SyncBlockchain, tempBlock)
 	fmt.Println(SyncBlockchain)
 	index++
 
-	conn.Write([]byte(string("\nhelodocmderefrf\n")))
+	output, err := json.Marshal(SyncBlockchain)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	conn.Write([]byte(string(output) + "\n"))
+
 	conn.Close()
 }
 
