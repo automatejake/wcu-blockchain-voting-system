@@ -1,1 +1,10 @@
-Client and server processes
+Each node in the network acts as both server and client.  
+
+1. Server 1 starts up and begins searching for Server 2
+2. Server 2 starts up and begins searching for Server 1 
+3. Server 1 finds Server 2 and Connects as a client, gets added to list of connected clients
+4. Server 2 finds Server 1 and Connects as a client, gets added to list of connected clients
+5. Client connects to and sends data to Server 1
+6. Server 1 broadcasts data to list of connected clients
+7. Both Server 1 and 2 have synchronized chains 
+
