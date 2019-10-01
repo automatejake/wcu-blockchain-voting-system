@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
@@ -14,16 +13,16 @@ type Block struct {
 	RandomNum int
 }
 
+var Clients []int
 var SyncBlockchain []Block
 var index int
 
 func handleConn(conn net.Conn) {
-	result, err := ioutil.ReadAll(conn)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	fmt.Println(result)
+	defer fmt.Println("Client disconnected")
+	defer conn.Close()
+
+	fmt.Println("Client connected")
 
 	newValue := rand.Intn(100)
 	var tempBlock Block
@@ -41,9 +40,22 @@ func handleConn(conn net.Conn) {
 		log.Fatal(err)
 	}
 
+	var buf [512]byte
+	for {
+		n, err := conn.Read(buf[0:])
+		if err != nil {
+			return
+		}
+		fmt.Println(string(buf[0:]))
+		_, err2 := conn.Write(buf[0:n])
+		if err2 != nil {
+			return
+		}
+	}
+
 	conn.Write([]byte(string(output) + "\n"))
 
-	conn.Close()
+	// conn.Close()
 }
 
 func main() {
@@ -54,6 +66,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println("Server listening on port", port)
 
 	for {
 		conn, err := server.Accept()
