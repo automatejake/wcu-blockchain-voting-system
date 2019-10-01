@@ -1,21 +1,35 @@
 package main
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
+	"io"
 	"log"
-	"math/rand"
 	"net"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type Block struct {
-	Index     int
-	RandomNum int
+	Index   int
+	Message string
 }
 
 var Clients []int
 var SyncBlockchain []Block
 var index int
+
+/*************
+*
+*  Two primary threads with child processes:
+*	1 - client, search for peers on the network and listen in on them
+*		a - each peer found opens a new listening process
+*		  - each listening process adds new things to the chain
+*	2 - server, listen for incoming connections
+*		a - each client that connects launches a listening process
+*		  - whenever, there is new data in the array, each listening process sends data to the listener
+*
+*************/
 
 func handleConn(conn net.Conn) {
 
@@ -23,39 +37,19 @@ func handleConn(conn net.Conn) {
 	defer conn.Close()
 
 	fmt.Println("Client connected")
+	scanner := bufio.NewScanner(conn)
 
-	newValue := rand.Intn(100)
-	var tempBlock Block
+	for scanner.Scan() {
+		message := scanner.Text()
+		var newBlock Block
+		newBlock.Index = index
+		newBlock.Message = string(message)
+		SyncBlockchain = append(SyncBlockchain, newBlock)
+		spew.Println(SyncBlockchain)
+		index++
 
-	tempBlock.Index = index
-	tempBlock.RandomNum = newValue
-
-	fmt.Println("New value is ", newValue)
-	SyncBlockchain = append(SyncBlockchain, tempBlock)
-	fmt.Println(SyncBlockchain)
-	index++
-
-	output, err := json.Marshal(SyncBlockchain)
-	if err != nil {
-		log.Fatal(err)
+		io.WriteString(conn, "\nEnter a message to write to the block:  ")
 	}
-
-	var buf [512]byte
-	for {
-		n, err := conn.Read(buf[0:])
-		if err != nil {
-			return
-		}
-		fmt.Println(string(buf[0:]))
-		_, err2 := conn.Write(buf[0:n])
-		if err2 != nil {
-			return
-		}
-	}
-
-	conn.Write([]byte(string(output) + "\n"))
-
-	// conn.Close()
 }
 
 func main() {
