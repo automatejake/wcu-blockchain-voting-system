@@ -19,6 +19,6 @@ do
         go run "processes$a/process$a.go" &
     fi
     
-    
+
 done
 
