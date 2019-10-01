@@ -31,6 +31,31 @@ var index int
 *
 *************/
 
+func searchPeers() {
+	for {
+
+	}
+}
+
+func listenConnections() {
+	port := ":1200"
+	server, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Server listening on port", port)
+
+	for {
+		conn, err := server.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		go handleConn(conn)
+	}
+}
+
 func handleConn(conn net.Conn) {
 
 	defer fmt.Println("Client disconnected")
@@ -54,21 +79,8 @@ func handleConn(conn net.Conn) {
 
 func main() {
 	index = 0
-	port := ":1200"
 
-	server, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatal(err)
-	}
+	go listenConnections()
+	go searchPeers()
 
-	fmt.Println("Server listening on port", port)
-
-	for {
-		conn, err := server.Accept()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		go handleConn(conn)
-	}
 }
