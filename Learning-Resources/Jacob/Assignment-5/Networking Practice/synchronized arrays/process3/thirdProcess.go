@@ -41,7 +41,7 @@ func foundPeer(conn net.Conn) {
 }
 
 func listenConnections() {
-	port := ":1200"
+	port := ":1201"
 	server, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatal(err)
@@ -97,7 +97,7 @@ func main() {
 	//Discovering peers, there are 65,535 ports on a computer
 	for {
 		// d := net.Dialer{Timeout: 1}
-		conn, _ := net.Dial("tcp", "127.0.0.1:1201")
+		conn, _ := net.Dial("tcp", "127.0.0.1:1200")
 
 		if conn == nil {
 			fmt.Println(conn, port)
