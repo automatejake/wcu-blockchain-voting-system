@@ -6,9 +6,12 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/joho/godotenv"
 )
 
 type Block struct {
@@ -16,7 +19,7 @@ type Block struct {
 	Message string
 }
 
-var Clients []int
+var Peers = make(map[int]bool)
 var SyncBlockchain []Block
 var index int
 
@@ -32,16 +35,22 @@ var index int
 *
 *************/
 
-func foundPeer(conn net.Conn) {
-	fmt.Println("found peer!")
+func foundPeer(conn net.Conn, port int) {
+
+	defer fmt.Println("Peer terminated process")
+
+	Peers[port] = true
+	fmt.Println("found peer!", conn)
 
 	message, _ := bufio.NewReader(conn).ReadString('\n')
 	fmt.Print("Message from server: " + message)
 
+	Peers[port] = false
 }
 
 func listenConnections() {
-	port := ":1200"
+	fmt.Println(os.Getenv("PORT"))
+	port := ":" + os.Getenv("PORT")
 	server, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatal(err)
@@ -84,28 +93,38 @@ func handleConn(conn net.Conn) {
 func broadcastChain() {
 	for {
 		time.Sleep(3 * time.Second)
-
 	}
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	ignore, _ := strconv.Atoi(os.Getenv("PORT"))
+	Peers[ignore] = true
 	index = 0
-	port := 7001
 
 	go listenConnections()
 
 	//Discovering peers, there are 65,535 ports on a computer
+	//I am using ports 7000-7020
 	for {
+		for port := 7000; port <= 7020; port++ {
+			// fmt.Println(Peers[port])
 
-		conn, _ := net.Dial("tcp", "127.0.0.1:"+port)
+			if !Peers[port] {
 
-		if conn == nil {
-			fmt.Println(conn, port)
-		} else {
-			go foundPeer(conn)
+				conn, _ := net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(port))
+				if conn != nil {
+					fmt.Println(conn)
+					go foundPeer(conn, port)
+				}
+
+			}
+
+			time.Sleep(100 * time.Millisecond)
 		}
-
-		time.Sleep(5 * time.Second)
 	}
 
 }

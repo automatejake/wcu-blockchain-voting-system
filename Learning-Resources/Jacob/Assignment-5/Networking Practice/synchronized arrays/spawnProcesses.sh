@@ -11,12 +11,12 @@ done
 
 for ((a = 0 ; a < $num; a++ ));
 do
-    mkdir "processes$a"
-    cp process1.go "processes$a/process$a.go"
-    echo -e "PORT=700$a" >> "processes$a/.env"
+    mkdir "process$a"
+    cp process.go "process$a/process$a.go"
+    echo -e "PORT=700$a" >> "process$a/.env"
     if $runProcesses ; then
         echo "starting process $a on port 700$a"
-        go run "processes$a/process$a.go" &
+        # go run "process$a/process$a.go" &
     fi
     
 
