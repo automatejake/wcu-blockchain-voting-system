@@ -90,14 +90,14 @@ func broadcastChain() {
 
 func main() {
 	index = 0
-	port := 80
+	port := "1201"
 
 	go listenConnections()
 
 	//Discovering peers, there are 65,535 ports on a computer
 	for {
-		// d := net.Dialer{Timeout: 1}
-		conn, _ := net.Dial("tcp", "127.0.0.1:1201")
+
+		conn, _ := net.Dial("tcp", "127.0.0.1:"+port)
 
 		if conn == nil {
 			fmt.Println(conn, port)
