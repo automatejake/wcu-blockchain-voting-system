@@ -76,10 +76,10 @@ func handleConn(conn net.Conn) {
 	fmt.Println("Client connected")
 	scanner := bufio.NewScanner(conn)
 
-	go broadcastChain()
-
+	// go broadcastChain(conn)
+	io.WriteString(conn, "\nEnter a message to write to the block:  ")
 	for scanner.Scan() {
-		io.WriteString(conn, "\nEnter a message to write to the block:  ")
+
 		message := scanner.Text()
 		var newBlock Block
 		newBlock.Index = index
@@ -90,8 +90,9 @@ func handleConn(conn net.Conn) {
 	}
 }
 
-func broadcastChain() {
+func broadcastChain(conn net.Conn) {
 	for {
+		// io.WriteString(conn, "\nbeep hilobat")
 		time.Sleep(3 * time.Second)
 	}
 }
@@ -111,7 +112,6 @@ func main() {
 	//I am using ports 7000-7020
 	for {
 		for port := 7000; port <= 7020; port++ {
-			// fmt.Println(Peers[port])
 
 			if !Peers[port] {
 

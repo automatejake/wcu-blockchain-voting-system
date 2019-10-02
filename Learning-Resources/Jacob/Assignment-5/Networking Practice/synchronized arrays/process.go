@@ -35,19 +35,7 @@ var index int
 *
 *************/
 
-func foundPeer(conn net.Conn, port int) {
-
-	defer fmt.Println("Peer terminated process")
-
-	Peers[port] = true
-	fmt.Println("found peer!", conn)
-
-	message, _ := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print("Message from server: " + message)
-
-	Peers[port] = false
-}
-
+/******* SERVER PORTION *******/
 func listenConnections() {
 	fmt.Println(os.Getenv("PORT"))
 	port := ":" + os.Getenv("PORT")
@@ -76,7 +64,7 @@ func handleConn(conn net.Conn) {
 	fmt.Println("Client connected")
 	scanner := bufio.NewScanner(conn)
 
-	go broadcastChain()
+	// go broadcastChain(conn)
 
 	for scanner.Scan() {
 		io.WriteString(conn, "\nEnter a message to write to the block:  ")
@@ -90,11 +78,29 @@ func handleConn(conn net.Conn) {
 	}
 }
 
-func broadcastChain() {
+func broadcastChain(conn net.Conn) {
 	for {
 		time.Sleep(3 * time.Second)
 	}
 }
+
+/***************************************************************/
+
+/******* CLIENT PORTION *******/
+func foundPeer(conn net.Conn, port int) {
+
+	defer fmt.Println("Peer terminated process")
+
+	Peers[port] = true
+	fmt.Println("found peer!", conn)
+
+	message, _ := bufio.NewReader(conn).ReadString('\n')
+	fmt.Print("Message from server: " + message)
+
+	Peers[port] = false
+}
+
+/***************************************************************/
 
 func main() {
 	err := godotenv.Load()
@@ -111,7 +117,6 @@ func main() {
 	//I am using ports 7000-7020
 	for {
 		for port := 7000; port <= 7020; port++ {
-			// fmt.Println(Peers[port])
 
 			if !Peers[port] {
 
