@@ -1,16 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 )
 
@@ -20,7 +17,7 @@ type Block struct {
 }
 
 var Peers = make(map[int]bool)
-var SyncBlockchain []Block
+var Blockchain []Block
 var index int
 
 /*************
@@ -62,27 +59,32 @@ func handleConn(conn net.Conn) {
 	defer conn.Close()
 
 	fmt.Println("Client connected")
-	scanner := bufio.NewScanner(conn)
 
-	go broadcastChain(conn)
-
-	for scanner.Scan() {
-		io.WriteString(conn, "\nEnter a message to write to the block:  ")
-		message := scanner.Text()
-		var newBlock Block
-		newBlock.Index = index
-		newBlock.Message = string(message)
-		SyncBlockchain = append(SyncBlockchain, newBlock)
-		spew.Println(SyncBlockchain)
-		index++
-	}
-}
-
-func broadcastChain(conn net.Conn) {
+	var buf [512]byte
 	for {
-		// conn.Write([]byte())
-		time.Sleep(3 * time.Second)
+		n, err := conn.Read(buf[0:])
+		if err != nil {
+			return
+		}
+		fmt.Println(string(buf[0:]))
+		_, err2 := conn.Write(buf[0:n])
+		if err2 != nil {
+			return
+		}
 	}
+	// scanner := bufio.NewScanner(conn)
+
+	// for scanner.Scan() {
+	// 	io.WriteString(conn, "\nEnter a message to write to the block:  ")
+	// 	message := scanner.Text()
+	// 	var newBlock Block
+	// 	newBlock.Index = index
+	// 	newBlock.Message = string(message)
+	// 	Blockchain = append(Blockchain, newBlock)
+	// 	spew.Println(Blockchain)
+	// 	index++
+	// }
+
 }
 
 /***************************************************************/
@@ -91,13 +93,22 @@ func broadcastChain(conn net.Conn) {
 func foundPeer(conn net.Conn, port int) {
 
 	defer fmt.Println("Peer terminated process")
+	defer closeConnection(port)
 
 	Peers[port] = true
 	fmt.Println("found peer!", conn)
 
-	message, _ := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print("Message from server: " + message)
+	//read incoming messages from peers (new blocks)
+	for {
 
+	}
+
+	// message, _ := bufio.NewReader(conn).ReadString('\n')
+	// fmt.Println("Message from server: " + message)
+
+}
+
+func closeConnection(port int) {
 	Peers[port] = false
 }
 
