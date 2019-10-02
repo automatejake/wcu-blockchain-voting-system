@@ -1,13 +1,15 @@
-read -p 'Enter the number of Processes: ' num
+num=10
+
+# read -p 'Enter the number of Processes: ' num
 runProcesses=false
-while true; do
-    read -p "Do you wish to run processes?" yn
-    case $yn in
-        [Yy]* ) runProcesses=true; break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+# while true; do
+#     read -p "Do you wish to run processes?" yn
+#     case $yn in
+#         [Yy]* ) runProcesses=true; break;;
+#         [Nn]* ) break;;
+#         * ) echo "Please answer yes or no.";;
+#     esac
+# done
 
 for ((a = 0 ; a < $num; a++ ));
 do

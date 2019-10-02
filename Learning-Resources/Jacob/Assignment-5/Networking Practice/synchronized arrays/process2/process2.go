@@ -64,7 +64,7 @@ func handleConn(conn net.Conn) {
 	fmt.Println("Client connected")
 	scanner := bufio.NewScanner(conn)
 
-	// go broadcastChain(conn)
+	go broadcastChain(conn)
 
 	for scanner.Scan() {
 		io.WriteString(conn, "\nEnter a message to write to the block:  ")
@@ -80,6 +80,7 @@ func handleConn(conn net.Conn) {
 
 func broadcastChain(conn net.Conn) {
 	for {
+		// conn.Write([]byte())
 		time.Sleep(3 * time.Second)
 	}
 }
@@ -122,7 +123,6 @@ func main() {
 
 				conn, _ := net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(port))
 				if conn != nil {
-					fmt.Println(conn)
 					go foundPeer(conn, port)
 				}
 
