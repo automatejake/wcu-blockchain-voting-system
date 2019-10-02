@@ -35,19 +35,7 @@ var index int
 *
 *************/
 
-func foundPeer(conn net.Conn, port int) {
-
-	defer fmt.Println("Peer terminated process")
-
-	Peers[port] = true
-	fmt.Println("found peer!", conn)
-
-	message, _ := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print("Message from server: " + message)
-
-	Peers[port] = false
-}
-
+/******* SERVER PORTION *******/
 func listenConnections() {
 	fmt.Println(os.Getenv("PORT"))
 	port := ":" + os.Getenv("PORT")
@@ -77,9 +65,9 @@ func handleConn(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 
 	// go broadcastChain(conn)
-	io.WriteString(conn, "\nEnter a message to write to the block:  ")
-	for scanner.Scan() {
 
+	for scanner.Scan() {
+		io.WriteString(conn, "\nEnter a message to write to the block:  ")
 		message := scanner.Text()
 		var newBlock Block
 		newBlock.Index = index
@@ -92,10 +80,27 @@ func handleConn(conn net.Conn) {
 
 func broadcastChain(conn net.Conn) {
 	for {
-		// io.WriteString(conn, "\nbeep hilobat")
 		time.Sleep(3 * time.Second)
 	}
 }
+
+/***************************************************************/
+
+/******* CLIENT PORTION *******/
+func foundPeer(conn net.Conn, port int) {
+
+	defer fmt.Println("Peer terminated process")
+
+	Peers[port] = true
+	fmt.Println("found peer!", conn)
+
+	message, _ := bufio.NewReader(conn).ReadString('\n')
+	fmt.Print("Message from server: " + message)
+
+	Peers[port] = false
+}
+
+/***************************************************************/
 
 func main() {
 	err := godotenv.Load()
