@@ -16,6 +16,11 @@ type Block struct {
 	Message string
 }
 
+type Peer struct {
+	Port       int
+	Connection net.Conn
+}
+
 var Peers = make(map[int]bool)
 var Blockchain []Block
 var index int
@@ -67,7 +72,7 @@ func handleConn(conn net.Conn) {
 			return
 		}
 		fmt.Println(string(buf[0:]))
-		_, err2 := conn.Write(buf[0:n])
+		_, err2 := conn.Write(buf[0:n]) //ONLY WRITING TO THE NODE THAT SENT THE DATA, NEED WAY TO BROADCAST TO ALL LISTENING NODES
 		if err2 != nil {
 			return
 		}
