@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -14,39 +15,13 @@ import (
 
 var array []int
 
-func handleConn(conn net.Conn) {
-	defer conn.Close()
-
-	io.WriteString(conn, "Enter a number: ")
-	input := bufio.NewScanner(conn)
-
-	for input.Scan() {
-		inputNum, err := strconv.Atoi(input.Text())
-		if err != nil {
-			log.Printf("%v was not a number. %v", input.Text(), err)
-		}
-
-		array = append(array, inputNum)
-
-		output, err := json.Marshal(array)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		io.WriteString(conn, string(output))
-	}
-}
-
-func main() {
-	err := godotenv.Load()
+func listenConn(env string) {
+	port := ":" + os.Getenv(env)
+	server, err := net.Listen("tcp", string(port))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	server, err := net.Listen("tcp", ":"+os.Getenv("ADDR"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	fmt.Println("Listening on" + string(port))
 	defer server.Close()
 
 	for {
@@ -56,4 +31,38 @@ func main() {
 		}
 		go handleConn(conn)
 	}
+}
+
+func handleConn(conn net.Conn) {
+	defer conn.Close()
+
+	fmt.Println("Client Connected!")
+
+	io.WriteString(conn, "Enter a number: ")
+	input := bufio.NewScanner(conn)
+
+	for input.Scan() {
+		num, err := strconv.Atoi(input.Text())
+		if err != nil {
+			log.Println("The input was not a number.")
+		}
+		array = append(array, num)
+
+		output, err := json.Marshal(array)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		io.WriteString(conn, "Successfully input to array.\n"+string(output))
+	}
+}
+
+func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("File not loaded correctly.")
+	}
+
+	go listenConn("PORT_1")
+	listenConn("PORT_2")
 }
