@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net"
@@ -105,8 +107,12 @@ func peerProcess(conn net.Conn) {
 			go broadcast(tempBlock)
 
 		} else if string(buf[0:9]) == "broadcast" {
-
-			fmt.Println(string(buf[10:msgLength]))
+			tmpbuff := bytes.NewBuffer(buf[10:msgLength])
+			tmpstruct := new(Block)
+			gobobj := gob.NewDecoder(tmpbuff)
+			gobobj.Decode(tmpstruct)
+			// fmt.Println(string(buf[10:msgLength]))
+			spew.Println(tmpstruct)
 
 		} else {
 			fmt.Println(msgLength, string(buf[0:10]), buf[0:10])
@@ -116,8 +122,14 @@ func peerProcess(conn net.Conn) {
 }
 
 func broadcast(tempBlock Block) {
+	// creates an encoder object
+	buf := new(bytes.Buffer)
+	gobobj := gob.NewEncoder(buf)
+	gobobj.Encode(tempBlock)
+
 	for _, element := range Peers {
-		element.Socket.Write([]byte("broadcast hi"))
+
+		element.Socket.Write(append([]byte("broadcast "), buf.Bytes()...))
 	}
 }
 
