@@ -21,14 +21,15 @@ type Peer struct {
 	Connection net.Conn
 }
 
-var Peers = make(map[int]bool)
+var Peers []Peer
+var Nodes = make(map[int]bool)
 var Blockchain []Block
 var index int
 
 /*************
 *
 *  Two primary threads with child processes:
-*	1 - client, search for peers on the network and listen in on them
+*	1 - client, search for Clients on the network and listen in on them
 *		a - each peer found opens a new listening process
 *		  - each listening process adds new things to the chain
 *	2 - server, listen for incoming connections
@@ -39,7 +40,6 @@ var index int
 
 /******* SERVER PORTION *******/
 func listenConnections() {
-	fmt.Println(os.Getenv("PORT"))
 	port := ":" + os.Getenv("PORT")
 	server, err := net.Listen("tcp", port)
 	if err != nil {
@@ -100,10 +100,10 @@ func foundPeer(conn net.Conn, port int) {
 	defer fmt.Println("Peer terminated process")
 	defer closeConnection(port)
 
-	Peers[port] = true
+	Nodes[port] = true
 	fmt.Println("found peer!", conn)
 
-	//read incoming messages from peers (new blocks)
+	//read incoming messages from Clients (new blocks)
 	for {
 
 	}
@@ -114,7 +114,7 @@ func foundPeer(conn net.Conn, port int) {
 }
 
 func closeConnection(port int) {
-	Peers[port] = false
+	Nodes[port] = false
 }
 
 /***************************************************************/
@@ -125,17 +125,17 @@ func main() {
 		log.Fatal(err)
 	}
 	ignore, _ := strconv.Atoi(os.Getenv("PORT"))
-	Peers[ignore] = true
+	Nodes[ignore] = true
 	index = 0
 
 	go listenConnections()
 
-	//Discovering peers, there are 65,535 ports on a computer
+	//Discovering Clients, there are 65,535 ports on a computer
 	//I am using ports 7000-7020
 	for {
 		for port := 7000; port <= 7020; port++ {
 
-			if !Peers[port] {
+			if !Nodes[port] {
 
 				conn, _ := net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(port))
 				if conn != nil {
