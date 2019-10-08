@@ -70,15 +70,18 @@ func peerProcess(conn net.Conn) {
 
 	//listen for new connection types
 	var buf [512]byte
+
 	for {
-		n, err := conn.Read(buf[0:])
+
+		msgLength, err := conn.Read(buf[0:])
+
 		if err != nil {
 			return
 		}
 
 		if string(buf[0:7]) == "connect" {
 
-			port, err := strconv.Atoi(string(buf[8:n]))
+			port, err := strconv.Atoi(string(buf[8:msgLength]))
 			if err == nil {
 				Nodes[port] = true
 				peer := Peer{port, conn}
@@ -87,6 +90,8 @@ func peerProcess(conn net.Conn) {
 
 		} else if string(buf[0:9]) == "broadcast" {
 			fmt.Println("recieved broadcast")
+		} else {
+			fmt.Println(msgLength)
 		}
 	}
 
