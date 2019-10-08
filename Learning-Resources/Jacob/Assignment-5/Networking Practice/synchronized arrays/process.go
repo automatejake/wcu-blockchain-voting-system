@@ -18,8 +18,8 @@ type Block struct {
 }
 
 type Peer struct {
-	Port       int
-	Connection net.Conn
+	Port   int
+	Socket net.Conn
 }
 
 var Peers []Peer
@@ -33,14 +33,14 @@ var index int
 *	1 - client, search for Clients on the network and listen in on them
 *		a - each peer found opens a new listening process
 *		  - each listening process adds new things to the chain
-*	2 - server, listen for incoming connections
+*	2 - server, listen for incoming Sockets
 *		a - each client that connects launches a listening process
 *		  - whenever, there is new data in the array, each listening process sends data to the listener
 *
 *************/
 
 /******* LISTENING PROCESS *******/
-func listenConnections() {
+func listenSockets() {
 	port := ":" + os.Getenv("PORT")
 	server, err := net.Listen("tcp", port)
 	if err != nil {
@@ -96,22 +96,29 @@ func peerProcess(conn net.Conn) {
 		} else if string(buf[0:7]) == "message" {
 			// after connecting via "nc localhost [port]"
 			// write to chain with "message [message inserted here]"
-			a := Block{index, string(buf[8 : msgLength-1])}
-			Blockchain = append(Blockchain, a)
+			tempBlock := Block{index, string(buf[8 : msgLength-1])}
+			Blockchain = append(Blockchain, tempBlock)
 			index++
 
 			//broadcast message to all other connected nodes
 			spew.Println(Blockchain)
+			go broadcast(tempBlock)
 
 		} else if string(buf[0:9]) == "broadcast" {
 
-			fmt.Println("recieved broadcast")
+			fmt.Println(string(buf[10:msgLength]))
 
 		} else {
 			fmt.Println(msgLength, string(buf[0:10]), buf[0:10])
 		}
 	}
 
+}
+
+func broadcast(tempBlock Block) {
+	for _, element := range Peers {
+		element.Socket.Write([]byte("broadcast hi"))
+	}
 }
 
 /***************************************************************/
@@ -127,7 +134,7 @@ func main() {
 
 	index = 0
 
-	go listenConnections()
+	go listenSockets()
 
 	//Discovering Clients, there are 65,535 ports on a computer
 	//I am using ports 7000-7020
@@ -152,3 +159,5 @@ func main() {
 	}
 
 }
+
+/******************************************************************************/
