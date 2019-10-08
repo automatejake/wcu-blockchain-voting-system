@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 )
 
@@ -63,10 +64,10 @@ func listenConnections() {
 /*** PEER PROCESS ***/
 func peerProcess(conn net.Conn) {
 
-	defer fmt.Println("Client disconnected")
+	defer fmt.Println("TCP Connection Ended")
 	defer conn.Close()
 
-	fmt.Println("Client connected")
+	fmt.Println("New TCP Connection")
 
 	//listen for new connection types
 	var buf [512]byte
@@ -88,10 +89,26 @@ func peerProcess(conn net.Conn) {
 				Peers = append(Peers, peer)
 			}
 
+		} else if string(buf[0:9]) == "syncChain" {
+
+			fmt.Println("syncing chain ", msgLength)
+
+		} else if string(buf[0:7]) == "message" {
+			// after connecting via "nc localhost [port]"
+			// write to chain with "message [message inserted here]"
+			a := Block{index, string(buf[8 : msgLength-1])}
+			Blockchain = append(Blockchain, a)
+			index++
+
+			//broadcast message to all other connected nodes
+			spew.Println(Blockchain)
+
 		} else if string(buf[0:9]) == "broadcast" {
+
 			fmt.Println("recieved broadcast")
+
 		} else {
-			fmt.Println(msgLength)
+			fmt.Println(msgLength, string(buf[0:10]), buf[0:10])
 		}
 	}
 
@@ -99,6 +116,7 @@ func peerProcess(conn net.Conn) {
 
 /***************************************************************/
 
+/****** Discovery Process ******/
 func main() {
 	err := godotenv.Load()
 	if err != nil {
