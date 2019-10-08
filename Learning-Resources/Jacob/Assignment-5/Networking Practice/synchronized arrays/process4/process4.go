@@ -53,7 +53,6 @@ func listenConnections() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("this far")
 
 		go peerProcess(conn)
 	}
@@ -67,10 +66,7 @@ func peerProcess(conn net.Conn) {
 	defer fmt.Println("Client disconnected")
 	defer conn.Close()
 
-	//create peer object
-	var peer Peer
-	peer.Connection = conn
-	peer.Port = 100
+	fmt.Println("Client connected")
 
 	//listen for new connection types
 	var buf [512]byte
@@ -81,14 +77,14 @@ func peerProcess(conn net.Conn) {
 		}
 
 		if string(buf[0:7]) == "connect" {
-			fmt.Print("made it this far!")
-			a := string(buf[8 : n-1])
-			port, err := strconv.Atoi(a)
+
+			port, err := strconv.Atoi(string(buf[8:n]))
 			if err == nil {
-				peer.Port = port
 				Nodes[port] = true
+				peer := Peer{port, conn}
 				Peers = append(Peers, peer)
 			}
+
 		} else if string(buf[0:9]) == "broadcast" {
 			fmt.Println("recieved broadcast")
 		}
@@ -119,9 +115,10 @@ func main() {
 				currentPort := strconv.Itoa(port)
 				conn, _ := net.Dial("tcp", "127.0.0.1:"+currentPort)
 				if conn != nil {
+					peer := Peer{port, conn}
+					Peers = append(Peers, peer)
 					Nodes[port] = true
-					conn.Write([]byte("connect " + currentPort))
-
+					conn.Write([]byte("connect " + strconv.Itoa(ignore)))
 					go peerProcess(conn)
 				}
 
