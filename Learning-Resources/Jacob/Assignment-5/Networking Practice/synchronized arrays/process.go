@@ -26,6 +26,8 @@ type Peer struct {
 
 var Peers []Peer
 var Nodes = make(map[int]bool)
+
+//both of these should be channels or use mutex for writing to them
 var Blockchain []Block
 var index int
 
@@ -103,7 +105,7 @@ func peerProcess(conn net.Conn) {
 			index++
 
 			//broadcast message to all other connected nodes
-			spew.Println(Blockchain)
+			spew.Println(tempBlock)
 			go broadcast(tempBlock)
 
 		} else if string(buf[0:9]) == "broadcast" {
@@ -111,8 +113,7 @@ func peerProcess(conn net.Conn) {
 			tmpstruct := new(Block)
 			gobobj := gob.NewDecoder(tmpbuff)
 			gobobj.Decode(tmpstruct)
-			// fmt.Println(string(buf[10:msgLength]))
-			spew.Println(tmpstruct)
+			spew.Println(*tmpstruct)
 
 		} else {
 			fmt.Println(msgLength, string(buf[0:10]), buf[0:10])
@@ -128,7 +129,6 @@ func broadcast(tempBlock Block) {
 	gobobj.Encode(tempBlock)
 
 	for _, element := range Peers {
-
 		element.Socket.Write(append([]byte("broadcast "), buf.Bytes()...))
 	}
 }

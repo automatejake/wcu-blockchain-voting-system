@@ -103,7 +103,7 @@ func peerProcess(conn net.Conn) {
 			index++
 
 			//broadcast message to all other connected nodes
-			spew.Println(Blockchain)
+			spew.Println(tempBlock)
 			go broadcast(tempBlock)
 
 		} else if string(buf[0:9]) == "broadcast" {
@@ -111,8 +111,7 @@ func peerProcess(conn net.Conn) {
 			tmpstruct := new(Block)
 			gobobj := gob.NewDecoder(tmpbuff)
 			gobobj.Decode(tmpstruct)
-			// fmt.Println(string(buf[10:msgLength]))
-			spew.Println(tmpstruct)
+			spew.Println(*tmpstruct)
 
 		} else {
 			fmt.Println(msgLength, string(buf[0:10]), buf[0:10])
