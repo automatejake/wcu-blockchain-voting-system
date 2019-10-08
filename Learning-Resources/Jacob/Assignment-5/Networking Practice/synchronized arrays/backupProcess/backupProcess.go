@@ -38,7 +38,7 @@ var index int
 *
 *************/
 
-/******* LISTENING PROCESS *******/
+/******* SERVER PORTION *******/
 func listenConnections() {
 	port := ":" + os.Getenv("PORT")
 	server, err := net.Listen("tcp", port)
@@ -53,37 +53,68 @@ func listenConnections() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("this far")
 
-		go peerProcess(conn)
+		go handleConn(conn)
 	}
 }
 
-/***************************************************************/
-
-/*** PEER PROCESS ***/
-func peerProcess(conn net.Conn) {
+func handleConn(conn net.Conn) {
 
 	defer fmt.Println("Client disconnected")
 	defer conn.Close()
 
-	//add connection to peer array
+	fmt.Println("Client connected")
 
-	//listen for new connection types
 	var buf [512]byte
 	for {
-		_, err := conn.Read(buf[0:])
+		n, err := conn.Read(buf[0:])
 		if err != nil {
 			return
 		}
-
-		if string(buf[0:7]) == "connect" {
-			fmt.Println("connected")
-		} else if string(buf[0:9]) == "broadcast" {
-			fmt.Println("recieved broadcast")
+		fmt.Println(string(buf[0:]))
+		_, err2 := conn.Write(buf[0:n]) //ONLY WRITING TO THE NODE THAT SENT THE DATA, NEED WAY TO BROADCAST TO ALL LISTENING NODES
+		if err2 != nil {
+			return
 		}
 	}
+	// scanner := bufio.NewScanner(conn)
 
+	// for scanner.Scan() {
+	// 	io.WriteString(conn, "\nEnter a message to write to the block:  ")
+	// 	message := scanner.Text()
+	// 	var newBlock Block
+	// 	newBlock.Index = index
+	// 	newBlock.Message = string(message)
+	// 	Blockchain = append(Blockchain, newBlock)
+	// 	spew.Println(Blockchain)
+	// 	index++
+	// }
+
+}
+
+/***************************************************************/
+
+/******* CLIENT PORTION *******/
+func foundPeer(conn net.Conn, port int) {
+
+	defer fmt.Println("Peer terminated process")
+	defer closeConnection(port)
+
+	Nodes[port] = true
+	fmt.Println("found peer!", conn)
+
+	//read incoming messages from Clients (new blocks)
+	for {
+
+	}
+
+	// message, _ := bufio.NewReader(conn).ReadString('\n')
+	// fmt.Println("Message from server: " + message)
+
+}
+
+func closeConnection(port int) {
+	Nodes[port] = false
 }
 
 /***************************************************************/
@@ -95,7 +126,6 @@ func main() {
 	}
 	ignore, _ := strconv.Atoi(os.Getenv("PORT"))
 	Nodes[ignore] = true
-
 	index = 0
 
 	go listenConnections()
@@ -109,8 +139,7 @@ func main() {
 
 				conn, _ := net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(port))
 				if conn != nil {
-					Nodes[port] = true
-					go peerProcess(conn)
+					go foundPeer(conn, port)
 				}
 
 			}
