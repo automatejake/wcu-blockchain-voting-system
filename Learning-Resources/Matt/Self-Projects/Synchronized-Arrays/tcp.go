@@ -1,22 +1,29 @@
 package main
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
-var array []int
+type Peer struct {
+	Port   int
+	Socket net.Conn
+}
 
-func listenConn(env string) {
-	port := ":" + os.Getenv(env)
+var array []string
+
+var Peers []Peer
+var Ports = make(map[int]bool)
+
+func listenConn() {
+	port := ":" + os.Getenv("PORT")
 	server, err := net.Listen("tcp", string(port))
 	if err != nil {
 		log.Fatal(err)
@@ -36,24 +43,41 @@ func listenConn(env string) {
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 
-	fmt.Println("Client Connected!")
+	var buf [512]byte
 
-	io.WriteString(conn, "Enter a number: ")
-	input := bufio.NewScanner(conn)
+	for {
+		//go readMessages(conn)
 
-	for input.Scan() {
-		num, err := strconv.Atoi(input.Text())
+		length, err := conn.Read(buf[0:])
+
 		if err != nil {
-			log.Println("The input was not a number.")
-		}
-		array = append(array, num)
-
-		output, err := json.Marshal(array)
-		if err != nil {
-			log.Fatal(err)
+			return
 		}
 
-		io.WriteString(conn, "Successfully input to array.\n"+string(output))
+		if string(buf[0:7]) == "message" {
+			tempString := string(buf[8 : length-1])
+			array = append(array, tempString)
+
+			go broadcast(tempString, conn)
+		}
+	}
+}
+
+func broadcast(tempString string, conn net.Conn) {
+	bs := []byte(tempString)
+	io.WriteString(conn, string(len(Peers)))
+	for _, sockets := range Peers {
+		sockets.Socket.Write(append([]byte("broadcast "), bs...))
+		io.WriteString(conn, "Writing to "+string(sockets.Port)+" with bytes "+string(bs))
+	}
+}
+
+func readMessages(conn net.Conn) {
+	bs := make([]byte, 256)
+	message, err := conn.Read(bs)
+	if err == nil {
+		array = append(array, string(message))
+		io.WriteString(conn, string(len(array)))
 	}
 }
 
@@ -62,7 +86,28 @@ func main() {
 	if err != nil {
 		log.Println("File not loaded correctly.")
 	}
+	ignore, _ := strconv.Atoi(os.Getenv("PORT"))
+	Ports[ignore] = true
 
-	go listenConn("PORT_1")
-	listenConn("PORT_2")
+	go listenConn()
+
+	for {
+		for port := 9000; port <= 9001; port++ {
+			if !Ports[port] {
+				fmt.Println("Checking...")
+				currentPort := strconv.Itoa(port)
+				conn, _ := net.Dial("tcp", "127.0.0.1:"+currentPort)
+				if conn != nil {
+					fmt.Println("Found Peer!")
+					peer := Peer{port, conn}
+					Peers = append(Peers, peer)
+					fmt.Println(string(len(Peers)))
+					Ports[port] = true
+					go handleConn(conn)
+				}
+			}
+
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
 }
