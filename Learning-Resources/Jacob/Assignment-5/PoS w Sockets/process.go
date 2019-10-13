@@ -106,7 +106,6 @@ func peerProcess(conn net.Conn) {
 			index++
 
 			//broadcast message to all other connected nodes
-			spew.Println(tempBlock)
 			go broadcast(tempBlock)
 
 		} else if string(buf[0:9]) == "broadcast" {
@@ -115,13 +114,13 @@ func peerProcess(conn net.Conn) {
 			gobobj := gob.NewDecoder(tmpbuff)
 			gobobj.Decode(tempBlock)
 
-			if tempBlock.Index == index+1 {
+			fmt.Println("Recieved Brodcast from ", conn)
+			if tempBlock.Index == index {
 				Blockchain = append(Blockchain, *tempBlock)
+				go broadcast(*tempBlock)
+				spew.Println(Blockchain)
 				index++
-
 			}
-
-			spew.Println(*tempBlock)
 
 		} else {
 			fmt.Println(msgLength, string(buf[0:10]), buf[0:10])

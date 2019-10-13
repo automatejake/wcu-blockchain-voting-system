@@ -20,7 +20,8 @@ type Block struct {
 }
 
 type Peer struct {
-	Port   int
+	Port int
+	// CurrentBlock int
 	Socket net.Conn
 }
 
@@ -105,15 +106,21 @@ func peerProcess(conn net.Conn) {
 			index++
 
 			//broadcast message to all other connected nodes
-			spew.Println(tempBlock)
 			go broadcast(tempBlock)
 
 		} else if string(buf[0:9]) == "broadcast" {
 			tmpbuff := bytes.NewBuffer(buf[10:msgLength])
-			tmpstruct := new(Block)
+			tempBlock := new(Block)
 			gobobj := gob.NewDecoder(tmpbuff)
-			gobobj.Decode(tmpstruct)
-			spew.Println(*tmpstruct)
+			gobobj.Decode(tempBlock)
+
+			fmt.Println("Recieved Brodcast from ", conn)
+			if tempBlock.Index == index {
+				Blockchain = append(Blockchain, *tempBlock)
+				go broadcast(*tempBlock)
+				spew.Println(Blockchain)
+				index++
+			}
 
 		} else {
 			fmt.Println(msgLength, string(buf[0:10]), buf[0:10])
