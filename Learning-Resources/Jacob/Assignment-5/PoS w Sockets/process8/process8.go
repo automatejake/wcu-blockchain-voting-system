@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
@@ -15,8 +17,12 @@ import (
 )
 
 type Block struct {
-	Index   int
-	Message string
+	Index     int
+	Timestamp string
+	Message   string
+	Validator string
+	PrevHash  string
+	Hash      string
 }
 
 type Peer struct {
@@ -43,6 +49,26 @@ var index int
 *		  - whenever, there is new data in the array, each listening process sends data to the listener
 *
 *************/
+
+/**** BLOCKCHAIN FUNCTIONS ****/
+func calculateHash(block Block) string {
+	s := string(block.Index) + block.Timestamp + block.Message + block.Validator + block.PrevHash
+	h := sha256.New()
+	h.Write([]byte(s))
+	hashed := h.Sum(nil)
+	return hex.EncodeToString(hashed)
+}
+
+// func validateHash(block Block) bool {
+// 	s := string(block.Index) + block.Timestamp + block.Message + block.Validator + block.PrevHash
+// 	h := sha256.New()
+// 	h.Write([]byte(s))
+// 	hashed := h.Sum(nil)
+
+// 	return true
+// }
+
+/******************************/
 
 /******* LISTENING PROCESS *******/
 func listenSockets() {
@@ -95,13 +121,20 @@ func peerProcess(conn net.Conn) {
 			}
 
 		} else if string(buf[0:9]) == "syncChain" {
-
 			fmt.Println("syncing chain ", msgLength)
-
 		} else if string(buf[0:7]) == "message" {
+
 			// after connecting via "nc localhost [port]"
 			// write to chain with "message [message inserted here]"
-			tempBlock := Block{index, string(buf[8 : msgLength-1])}
+			t := time.Now()
+			var tempBlock Block
+
+			tempBlock.Index = index
+			tempBlock.Timestamp = t.String()
+			tempBlock.Message = string(buf[8 : msgLength-1])
+			tempBlock.PrevHash = Blockchain[index-1].Hash
+			tempBlock.Validator = ""
+			tempBlock.Hash = calculateHash(tempBlock)
 			Blockchain = append(Blockchain, tempBlock)
 			index++
 
@@ -151,7 +184,10 @@ func main() {
 	ignore, _ := strconv.Atoi(os.Getenv("PORT"))
 	Nodes[ignore] = true
 
-	index = 0
+	tempBlock := Block{0, "00:00:00", "Genesis Block", "", "", ""}
+	Blockchain = append(Blockchain, tempBlock)
+
+	index = 1
 
 	go listenSockets()
 
