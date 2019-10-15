@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"strconv"
@@ -37,6 +38,8 @@ var Nodes = make(map[int]bool)
 //both of these should be channels or use mutex for writing to them
 var Blockchain []Block
 var index int
+var address string
+var balance int
 
 /*************
 *
@@ -184,6 +187,12 @@ func main() {
 	}
 	ignore, _ := strconv.Atoi(os.Getenv("PORT"))
 	Nodes[ignore] = true
+
+	address = "0x" + os.Getenv("PORT")
+
+	max := 100
+	min := 10
+	balance = rand.Intn(max-min) + min
 
 	tempBlock := Block{0, "00:00:00", "Genesis Block", "", "", ""}
 	Blockchain = append(Blockchain, tempBlock)
