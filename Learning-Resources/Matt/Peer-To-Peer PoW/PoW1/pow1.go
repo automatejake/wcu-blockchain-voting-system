@@ -109,6 +109,14 @@ func handleConn(conn net.Conn) {
 				peer := Peer{port, conn}
 				Peers = append(Peers, peer)
 			}
+
+		} else if string(buf[0:7]) == "genesis" {
+			genesisBlock := Block{0, time.Now().String(), 0, "", ""}
+			genesisBlock.Hash = calculateHash(genesisBlock)
+			Blockchain = append(Blockchain, genesisBlock)
+			fmt.Println("Genesis Block Created!")
+			go broadcast(genesisBlock)
+
 		} else if string(buf[0:7]) == "message" {
 			trimString := strings.TrimSuffix(string(buf[8:length]), "\n")
 			tempVote, err := strconv.Atoi(trimString)
@@ -121,6 +129,7 @@ func handleConn(conn net.Conn) {
 					go broadcast(tempBlock)
 				}
 			}
+
 		} else if string(buf[0:9]) == "broadcast" {
 			tempBuff := bytes.NewBuffer(buf[10:length])
 			tempStruct := new(Block)
@@ -159,10 +168,6 @@ func main() {
 	Ports[ignore] = true
 	index = 0
 
-	genesisBlock := Block{0, time.Now().String(), 0, "", ""}
-	genesisBlock.Hash = calculateHash(genesisBlock)
-	Blockchain = append(Blockchain, genesisBlock)
-
 	go listenConn()
 
 	for {
@@ -175,6 +180,7 @@ func main() {
 					fmt.Println("Found Peer!")
 					peer := Peer{port, conn}
 					Peers = append(Peers, peer)
+					conn.Write([]byte("connect " + strconv.Itoa(ignore)))
 					Ports[port] = true
 					go handleConn(conn)
 				}
