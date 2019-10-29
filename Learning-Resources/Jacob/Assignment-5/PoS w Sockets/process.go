@@ -27,8 +27,7 @@ type Block struct {
 }
 
 type Peer struct {
-	Port int
-	// CurrentBlock int
+	Port   int
 	Socket net.Conn
 }
 
