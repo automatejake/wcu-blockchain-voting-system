@@ -187,7 +187,6 @@ func handleConn(conn net.Conn) {
 			err := gobobj.Decode(tmpStruct)
 			if err == nil {
 				candidateBlocks <- *tmpStruct
-				fmt.Println(tempBlocks)
 			}
 		} else if string(buf[0:16]) == "recieve validate" {
 			buff := bytes.NewBuffer(buf[17:length])
@@ -261,9 +260,9 @@ func main() {
 	go listenConn()
 
 	go func() {
-		block, okay := <-candidateBlocks
-		if okay {
-			tempBlocks = append(tempBlocks, block)
+		for candidate := range candidateBlocks {
+			tempBlocks = append(tempBlocks, candidate)
+			fmt.Println(tempBlocks)
 		}
 	}()
 
