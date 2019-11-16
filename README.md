@@ -1,6 +1,6 @@
 # West Chester University Blockchain Voting System
 
-(This repository has been moved to honestvote.io)
+(This repository has been moved to [honestvote.io](https://github.com/jneubaum/honestvote.io)
 
 The world is in need of more secure voting and blockchain offers a very vialbe solution as voters can trace back their
 votes to a candidate.  Blockchain offers an extremely transparent ledger to the public that cannot be tampered with.
